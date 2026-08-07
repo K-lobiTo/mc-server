@@ -5,11 +5,9 @@ secrets.txt
 !minecraft.env
 
 # --- Minecraft server data (world, logs, generated files) ---
-mc-data/
+mc-data/*
 !mc-data/mods/
 !mc-data/mods/**
-
-# mc-data/mods/
 
 # --- World saves / backups ---
 mc-data/world*/
