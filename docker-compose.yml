@@ -4,12 +4,8 @@ services:
     container_name: mc-server
     ports:
       - "25565:25565"
-    environment:
-      EULA: "TRUE"
-      MEMORY: "5G"
-      VERSION: "26.2"
-      TYPE: "NEOFORGE"
-      NEOFORGE_VERSION: "26.2.0.49"
+    env_file:
+      - minecraft.env
     volumes:
       - ./mc-data:/data
     restart: unless-stopped
@@ -25,4 +21,3 @@ services:
     restart: unless-stopped
     depends_on:
       - minecraft
-

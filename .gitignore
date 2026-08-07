@@ -2,6 +2,7 @@
 .env
 *.env
 secrets.txt
+!minecraft.env
 
 # --- Minecraft server data (world, logs, generated files) ---
 mc-data/
