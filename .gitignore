@@ -1,0 +1,38 @@
+# --- Secrets ---
+.env
+*.env
+secrets.txt
+
+# --- Minecraft server data (world, logs, generated files) ---
+mc-data/
+!mc-data/mods/
+!mc-data/mods/**
+
+# mc-data/mods/
+
+# --- World saves / backups ---
+mc-data/world*/
+backups/
+*.tar.gz
+*.zip
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Docker ---
+docker-compose.override.yml
+
+# --- OS / editor junk ---
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# --- Java/Forge/NeoForge crash reports and cache ---
+crash-reports/
+libraries/
+cache/
