@@ -75,24 +75,50 @@ def find_world_dir(mc_data: Path) -> Path:
     raise FileNotFoundError("Could not locate the world folder under mc-data.")
 
 
+def find_data_folders(world_dir: Path) -> list:
+    """
+    Locates the folders holding per-player .dat/.json files, supporting both
+    save formats:
+      - Older MC:  world/playerdata/, world/stats/, world/advancements/  (siblings)
+      - MC 26.x+:  world/players/data/, world/players/stats/, world/players/advancements/
+    Returns a list of existing folder Paths to search.
+    """
+    folders = []
+
+    # New format (26.x+): world/players/{data,stats,advancements}
+    players_dir = world_dir / "players"
+    if players_dir.exists():
+        for sub in ["data", "stats", "advancements"]:
+            f = players_dir / sub
+            if f.exists():
+                folders.append(f)
+
+    # Older format: world/{playerdata,stats,advancements}
+    for sub in ["playerdata", "stats", "advancements"]:
+        f = world_dir / sub
+        if f.exists() and f not in folders:
+            folders.append(f)
+
+    return folders
+
+
 def gather_rename_plan(world_dir: Path, username_to_old_uuid: dict) -> list:
     """
     Returns a list of (old_path, new_path, username) tuples for every file
-    that needs renaming, across playerdata, stats, and advancements.
+    that needs renaming, across whichever data folders are found.
     """
     plan = []
-    subfolders = ["playerdata", "stats", "advancements"]
+    folders = find_data_folders(world_dir)
+
+    if not folders:
+        return plan
 
     for username, old_uuid in username_to_old_uuid.items():
         new_uuid = offline_uuid(username)
         old_uuid_norm = old_uuid.lower()
 
-        for sub in subfolders:
-            folder = world_dir / sub
-            if not folder.exists():
-                continue
-
-            # playerdata/advancements/stats files use .dat / .json, sometimes .dat_old
+        for folder in folders:
+            # player data files use .dat / .dat_old, stats/advancements use .json
             for ext in [".dat", ".dat_old", ".json"]:
                 old_file = folder / f"{old_uuid_norm}{ext}"
                 if old_file.exists():
@@ -167,7 +193,8 @@ def main():
 
     for old_file, new_file, uname in plan:
         # extra safety: copy the original into a backup folder before renaming
-        rel_backup_path = backup_dir / old_file.relative_to(world_dir)
+        # (flatten to folder-name/file to avoid deep nested path issues across save formats)
+        rel_backup_path = backup_dir / old_file.parent.name / old_file.name
         rel_backup_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(old_file, rel_backup_path)
 
